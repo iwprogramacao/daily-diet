@@ -20,13 +20,13 @@ export const Container = styled(TouchableOpacity)<ContainerProps>`
 type ArrowStyleProps = {
   type?: 'PRIMARY' | 'SECONDARY';
 };
-export const Arrow = styled(ArrowUpRight).attrs<ArrowStyleProps>(
-  ({ theme, type }) => ({
-    size: 30,
-    color: type === 'PRIMARY' ? theme.COLORS.GREEN_DARK : theme.COLORS.RED_DARK,
-  })
-)`
-  align-self: flex-end;
+export const Arrow = styled(ArrowUpRight)<ArrowStyleProps>`
+  ${({ theme, type }) => css`
+    color: ${type === 'PRIMARY'
+      ? theme.COLORS.GREEN_DARK
+      : theme.COLORS.RED_DARK};
+    align-self: flex-end;
+  `};
 `;
 
 export const Percentage = styled.Text`
@@ -42,7 +42,7 @@ export const Percentage = styled.Text`
 export const Subtitle = styled.Text`
   ${({ theme }) => css`
     color: ${theme.COLORS.GRAY_700};
-    font-size: ${theme.FONT_SIZE[14]}px;
+    font-size: ${theme.FONT_SIZE[16]}px;
     font-family: ${theme.FONT_FAMILY.REGULAR};
   `}
   align-self: center;

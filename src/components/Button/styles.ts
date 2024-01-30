@@ -34,6 +34,6 @@ export const Title = styled.Text<StyleProps>`
   ${({ theme, type }) => css`
     color: ${type === 'PRIMARY' ? theme.COLORS.WHITE : theme.COLORS.GRAY_700};
     font-family: ${theme.FONT_FAMILY.BOLD};
-    font-size: ${theme.FONT_SIZE[16]};
+    font-size: ${theme.FONT_SIZE[16]}px;
   `}
 `;

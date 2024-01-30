@@ -6,6 +6,7 @@ import { Button } from '@components/Button';
 import { SectionList } from 'react-native';
 import { RefeicaoCard } from '@components/RefeicaoCard';
 import { DietaContainerTitle } from '@components/RefeicaoCard/styles';
+import { Functions } from '../../Utils/Functions';
 
 type RefeicoesDTO = {
   hora: string;
@@ -22,6 +23,7 @@ type SectionListProps = {
 };
 
 export function Refeicoes() {
+  const functions = new Functions();
   const [dietas, setDietas] = useState<DietaDTO[]>([
     {
       dataFormatada: '12.08.22',
@@ -54,14 +56,11 @@ export function Refeicoes() {
   for (const dieta of dietas) {
     DATA.push({ title: dieta.dataFormatada, data: dieta.refeicoes });
   }
-  function formatarPorcentagem(valor: number): string {
-    return valor.toString().replace('.', ',').concat('%');
-  }
 
   return (
     <Container>
       <Logo source={logo} />
-      <StatisticsCard percentage={formatarPorcentagem(90.86)} />
+      <StatisticsCard percentage={functions.formatarPorcentagem(90.86)} />
       <ButtonTitle>Refeições</ButtonTitle>
       <Button icon="add" title="Nova refeição" />
 

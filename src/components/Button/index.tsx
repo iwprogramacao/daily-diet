@@ -4,7 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { TouchableOpacityProps } from 'react-native';
 
 type Props = TouchableOpacityProps & {
-  icon: keyof typeof MaterialIcons.glyphMap;
+  icon?: keyof typeof MaterialIcons.glyphMap;
   type?: 'PRIMARY' | 'SECONDARY';
   title: string;
 };

@@ -2,7 +2,6 @@ import { ArrowLeft } from 'phosphor-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 import { css } from 'styled-components/native';
-import DatePicker from 'react-native-date-picker';
 
 export const Container = styled(SafeAreaView)`
   flex: 1;
@@ -78,11 +77,4 @@ export const SidedInputs = styled.View`
   align-items: center;
   justify-content: center;
   gap: 12px;
-`;
-
-export const DataPicker = styled(DatePicker)`
-  border: 0.5px solid ${({ theme }) => theme.COLORS.GRAY_400};
-  border-radius: 6px;
-  min-height: 48px;
-  max-height: 48px;
 `;

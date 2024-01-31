@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
+  BooleanButton,
+  BooleanButtonIndicator,
+  BooleanButtonText,
   Container,
   Content,
   HeaderCard,
@@ -8,6 +11,7 @@ import {
   InputTitle,
   LargeInputText,
   SetaEsquerda,
+  SidedInputs,
 } from './styles';
 import {
   Platform,
@@ -25,25 +29,39 @@ import { Button } from '@components/Button';
 type onChangeProps = {
   type: string;
 };
-export function CadastroRefeicao() {
+
+export function CadastroRefeicao({}) {
   const functions = new Functions();
 
   const [data, setData] = useState<Date>(new Date());
   const [hora, setHora] = useState<Date>(new Date());
-  const [horaUTCBrasil, setHoraUTCBrasil] = useState<string>('');
-  const [horaFormatada, setHoraFormatada] = useState<string>('');
+  const [horaUTCBrasil, setHoraUTCBrasil] = useState<string>(
+    hora.toLocaleTimeString('pt-BR')
+  );
   const [showPicker, setShowPicker] = useState<boolean>(false);
+  const [isDentroDaDieta, setIsDentroDaDieta] = useState<boolean | null>(null);
 
-  const [showPickerTime, setShowPickerTime] = useState<boolean>(false);
+  const scrollViewRef = useRef<ScrollView | null>(null);
+
+  const [showPickerTime, setShowPickerTime] = useState<boolean | null>(null);
   const theme = useTheme();
 
   function toggleDatePicker() {
     setShowPicker(!showPicker);
+    handleInputFocus();
   }
   function toggleDateTimePicker() {
     setShowPickerTime(!showPickerTime);
+    handleInputFocus();
   }
 
+  function handleInputFocus() {
+    // Adiar a execução de scrollToEnd em 500ms
+    setTimeout(() => {
+      // Verificar se scrollViewRef.current não é nulo antes de chamar scrollToEnd
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 200);
+  }
   const onChange = ({ type }: onChangeProps, date: Date | undefined) => {
     if (date === undefined) {
       return;
@@ -73,6 +91,9 @@ export function CadastroRefeicao() {
       toggleDateTimePicker();
     }
   };
+  function handleIsDentroDaDieta() {
+    setIsDentroDaDieta(!isDentroDaDieta);
+  }
 
   return (
     <ScrollView
@@ -80,6 +101,7 @@ export function CadastroRefeicao() {
         backgroundColor: theme.COLORS.GRAY_100,
         flex: 1,
       }}
+      ref={scrollViewRef}
     >
       <Container>
         <HeaderCard>
@@ -96,6 +118,14 @@ export function CadastroRefeicao() {
 
           <View>
             <InputTitle>Data</InputTitle>
+
+            <Pressable onPress={toggleDatePicker}>
+              <InputText
+                value={data.toLocaleDateString('pt-br')}
+                editable={false}
+                onPressIn={toggleDatePicker}
+              />
+            </Pressable>
             {showPicker && (
               <DateTimePicker
                 value={data}
@@ -105,15 +135,7 @@ export function CadastroRefeicao() {
                 onChange={onChange}
               />
             )}
-            {!showPicker && (
-              <Pressable onPress={toggleDatePicker}>
-                <InputText
-                  value={data.toLocaleDateString('pt-br')}
-                  editable={false}
-                  onPressIn={toggleDatePicker}
-                />
-              </Pressable>
-            )}
+
             {showPicker && Platform.OS === 'ios' && (
               <View
                 style={{
@@ -145,6 +167,14 @@ export function CadastroRefeicao() {
           </View>
           <View>
             <InputTitle>Hora</InputTitle>
+            <Pressable onPress={toggleDateTimePicker}>
+              <InputText
+                onFocus={handleInputFocus}
+                value={functions.converterHoraMinuto(horaUTCBrasil)}
+                editable={false}
+                onPressIn={toggleDateTimePicker}
+              />
+            </Pressable>
             {showPickerTime && (
               <DateTimePicker
                 value={hora}
@@ -154,15 +184,7 @@ export function CadastroRefeicao() {
                 onChange={onChangeTime}
               />
             )}
-            {!showPickerTime && (
-              <Pressable onPress={toggleDateTimePicker}>
-                <InputText
-                  value={functions.converterHoraMinuto(horaUTCBrasil)}
-                  editable={false}
-                  onPressIn={toggleDateTimePicker}
-                />
-              </Pressable>
-            )}
+
             {showPickerTime && Platform.OS === 'ios' && (
               <View
                 style={{
@@ -192,6 +214,31 @@ export function CadastroRefeicao() {
               </View>
             )}
           </View>
+
+          <InputTitle>Está dentro da dieta?</InputTitle>
+          <SidedInputs>
+            <BooleanButton
+              isBotaoSelecionado={
+                isDentroDaDieta === null ? null : isDentroDaDieta
+              }
+              onPress={handleIsDentroDaDieta}
+              type="PRIMARY"
+            >
+              <BooleanButtonIndicator type="PRIMARY" />
+              <BooleanButtonText>Sim</BooleanButtonText>
+            </BooleanButton>
+            <BooleanButton
+              isBotaoSelecionado={
+                isDentroDaDieta === null ? null : !isDentroDaDieta
+              }
+              onPress={handleIsDentroDaDieta}
+              type="SECONDARY"
+            >
+              <BooleanButtonIndicator type="SECONDARY" />
+
+              <BooleanButtonText>Não</BooleanButtonText>
+            </BooleanButton>
+          </SidedInputs>
           <Button title="Cadastrar refeição" style={{ marginTop: 42 }} />
         </Content>
       </Container>

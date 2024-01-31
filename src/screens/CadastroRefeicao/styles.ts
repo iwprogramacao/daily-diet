@@ -1,7 +1,17 @@
 import { ArrowLeft } from 'phosphor-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import theme from 'src/theme';
 import styled from 'styled-components/native';
 import { css } from 'styled-components/native';
+
+type BooleanButtonStyleProps = {
+  type: 'DEFAULT' | 'PRIMARY' | 'SECONDARY';
+  isBotaoSelecionado: boolean | null;
+};
+
+type BooleanButtonIndicatorStyle = {
+  type: 'PRIMARY' | 'SECONDARY';
+};
 
 export const Container = styled(SafeAreaView)`
   flex: 1;
@@ -77,4 +87,47 @@ export const SidedInputs = styled.View`
   align-items: center;
   justify-content: center;
   gap: 12px;
+`;
+
+export const BooleanButton = styled.TouchableOpacity<BooleanButtonStyleProps>`
+  width: 48.5%;
+  min-height: 50px;
+  max-height: 50px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  flex-direction: row;
+
+  ${({ theme, type, isBotaoSelecionado }) => css`
+    background-color: ${theme.COLORS.GRAY_300};
+    border: 1px solid
+      ${!isBotaoSelecionado
+        ? theme.COLORS.GRAY_300
+        : type === 'PRIMARY'
+          ? theme.COLORS.GREEN_DARK
+          : theme.COLORS.RED_DARK};
+    background-color: ${!isBotaoSelecionado
+      ? theme.COLORS.GRAY_300
+      : type === 'PRIMARY'
+        ? theme.COLORS.GREEN_LIGHT
+        : theme.COLORS.RED_LIGHT};
+  `}
+`;
+
+export const BooleanButtonText = styled.Text`
+  ${({ theme }) => css`
+    color: ${theme.COLORS.GRAY_700};
+    font-family: ${theme.FONT_FAMILY.BOLD};
+    font-size: ${theme.FONT_SIZE[14]}px;
+  `}
+`;
+
+export const BooleanButtonIndicator = styled.View<BooleanButtonIndicatorStyle>`
+  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+
+  background-color: ${({ theme, type }) =>
+    type === 'PRIMARY' ? theme.COLORS.GREEN_DARK : theme.COLORS.RED_DARK};
 `;

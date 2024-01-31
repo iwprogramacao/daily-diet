@@ -12,6 +12,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Estatisticas } from '@screens/Estatisticas';
 import { CadastroRefeicao } from '@screens/CadastroRefeicao';
 import { Feedback } from '@screens/Feedback';
+import { DetalhamentoRefeicao } from '@screens/DetalhamentoRefeicao';
 
 export default function App() {
   const [fontsLoaded] = useFonts({ NunitoSans_400Regular, NunitoSans_700Bold });
@@ -23,7 +24,7 @@ export default function App() {
           backgroundColor="transparent"
           translucent
         />
-        {fontsLoaded ? <Feedback /> : <ActivityIndicator />}
+        {fontsLoaded ? <DetalhamentoRefeicao /> : <ActivityIndicator />}
       </SafeAreaProvider>
     </ThemeProvider>
   );

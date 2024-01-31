@@ -35,7 +35,7 @@ export const Percentage = styled.Text`
     font-size: ${theme.FONT_SIZE[32]}px;
     font-family: ${theme.FONT_FAMILY.BOLD};
   `}
-  margin-top: -16px;
+  margin-top: -8px;
   align-self: center;
 `;
 

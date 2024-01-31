@@ -7,12 +7,8 @@ import {
 } from '@expo-google-fonts/nunito-sans';
 import { ThemeProvider } from 'styled-components';
 import theme from './src/theme';
-import { Refeicoes } from '@screens/Refeicoes';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Estatisticas } from '@screens/Estatisticas';
-import { CadastroRefeicao } from '@screens/CadastroRefeicao';
-import { Feedback } from '@screens/Feedback';
-import { DetalhamentoRefeicao } from '@screens/DetalhamentoRefeicao';
+import { Routes } from '@routes/index';
 
 export default function App() {
   const [fontsLoaded] = useFonts({ NunitoSans_400Regular, NunitoSans_700Bold });
@@ -24,7 +20,7 @@ export default function App() {
           backgroundColor="transparent"
           translucent
         />
-        {fontsLoaded ? <DetalhamentoRefeicao /> : <ActivityIndicator />}
+        {fontsLoaded ? <Routes /> : <ActivityIndicator />}
       </SafeAreaProvider>
     </ThemeProvider>
   );

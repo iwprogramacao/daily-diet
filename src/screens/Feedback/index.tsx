@@ -5,7 +5,7 @@ import feedbackPositivo from '@assets/feedbackPositivo.png';
 import { Button } from '@components/Button';
 
 type Props = {
-  isDentroDaDieta: boolean;
+  isDentroDaDieta?: boolean;
 };
 export function Feedback({ isDentroDaDieta }: Props) {
   return (

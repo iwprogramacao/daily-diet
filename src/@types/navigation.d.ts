@@ -5,7 +5,7 @@ export declare global {
     interface RootParamList {
       refeicoes: undefined;
       cadastroRefeicoes: {
-        refeicao: RefeicaoDTO;
+        refeicao?: RefeicaoDTO;
       };
       detalhamentoRefeicao: {
         refeicao: RefeicaoDTO;
@@ -14,10 +14,11 @@ export declare global {
         isDentroDaDieta: boolean;
       };
       estatisticas: {
-        sequenciaDentroDaDieta: string;
-        refeicoesRegistradas: string;
-        refeicoesDentroDaDieta: string;
-        refeicoesForaDaDieta: string;
+        porcentagemDentroDaDieta: number;
+        sequenciaDentroDaDieta: number;
+        refeicoesRegistradas: number;
+        refeicoesDentroDaDieta: number;
+        refeicoesForaDaDieta: number;
       };
     }
   }

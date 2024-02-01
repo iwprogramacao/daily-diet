@@ -14,18 +14,37 @@ import {
 } from './styles';
 import { TouchableOpacity } from 'react-native';
 import { Functions } from 'src/Utils/Functions';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 type Props = {
   type?: 'PRIMARY' | 'SECONDARY';
 };
+type RouteParams = {
+  porcentagemDentroDaDieta: number;
+  sequenciaDentroDaDieta: number;
+  refeicoesRegistradas: number;
+  refeicoesDentroDaDieta: number;
+  refeicoesForaDaDieta: number;
+};
 export function Estatisticas({ type = 'PRIMARY' }: Props) {
   const functions = new Functions();
+  const route = useRoute();
+  const navigation = useNavigation();
+  const estatisticas = route.params as RouteParams;
+
+  function handleGoToRefeicoes() {
+    navigation.navigate('refeicoes');
+  }
   return (
     <Container type={type}>
       <HeaderCard type={type}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleGoToRefeicoes}>
           <SetaEsquerda type={type} size={24} />
-          <Percentage>{functions.formatarPorcentagem(90.86)}</Percentage>
+          <Percentage>
+            {functions.formatarPorcentagem(
+              estatisticas.porcentagemDentroDaDieta
+            )}
+          </Percentage>
           <Subtitle>das refeições dentro da dieta</Subtitle>
         </TouchableOpacity>
       </HeaderCard>
@@ -33,22 +52,22 @@ export function Estatisticas({ type = 'PRIMARY' }: Props) {
         <Texto>Estatísticas gerais</Texto>
 
         <Card type="NEUTRAL">
-          <CardTitle>22</CardTitle>
+          <CardTitle>{estatisticas.refeicoesDentroDaDieta}</CardTitle>
           <CardSubtitle>
             melhor sequência de pratos dentro da dieta
           </CardSubtitle>
         </Card>
         <Card type="NEUTRAL">
-          <CardTitle>109</CardTitle>
+          <CardTitle>{estatisticas.refeicoesRegistradas}</CardTitle>
           <CardSubtitle>refeições registradas</CardSubtitle>
         </Card>
         <SidedCards>
           <Card type="PRIMARY">
-            <CardTitle>99</CardTitle>
+            <CardTitle>{estatisticas.refeicoesDentroDaDieta}</CardTitle>
             <CardSubtitle>refeições dentro da dieta</CardSubtitle>
           </Card>
           <Card type="SECONDARY">
-            <CardTitle>10</CardTitle>
+            <CardTitle>{estatisticas.refeicoesForaDaDieta}</CardTitle>
             <CardSubtitle>refeições fora da dieta</CardSubtitle>
           </Card>
         </SidedCards>

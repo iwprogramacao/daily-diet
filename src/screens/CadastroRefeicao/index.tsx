@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   BooleanButton,
   BooleanButtonIndicator,
@@ -14,6 +14,7 @@ import {
   SidedInputs,
 } from './styles';
 import {
+  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -25,12 +26,22 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from 'styled-components';
 import { Functions } from 'src/Utils/Functions';
 import { Button } from '@components/Button';
+import { cadastrarNovaRefeicao } from '@storage/refeicao/cadastrarNovaRefeicao';
+import { RefeicaoDTO } from 'src/interfaces/RefeicaoDTO';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
+import { editarRefeicao } from '@storage/refeicao/editarRefeicao';
 
 type onChangeProps = {
   type: string;
 };
-
-export function CadastroRefeicao({}) {
+type RouteParams = {
+  refeicao: RefeicaoDTO;
+};
+export function CadastroRefeicao() {
   const functions = new Functions();
 
   const [data, setData] = useState<Date>(new Date());
@@ -40,11 +51,18 @@ export function CadastroRefeicao({}) {
   );
   const [showPicker, setShowPicker] = useState<boolean>(false);
   const [isDentroDaDieta, setIsDentroDaDieta] = useState<boolean | null>(null);
+  const [nome, setNome] = useState('');
+  const [descricao, setDescricao] = useState('');
+  const [isEdicao, setIsEdicao] = useState(false);
 
   const scrollViewRef = useRef<ScrollView | null>(null);
 
   const [showPickerTime, setShowPickerTime] = useState<boolean | null>(null);
   const theme = useTheme();
+  const navigation = useNavigation();
+
+  const route = useRoute();
+  const { refeicao } = route.params as RouteParams;
 
   function toggleDatePicker() {
     setShowPicker(!showPicker);
@@ -54,7 +72,6 @@ export function CadastroRefeicao({}) {
     setShowPickerTime(!showPickerTime);
     handleInputFocus();
   }
-
   function handleInputFocus() {
     // Adiar a execução de scrollToEnd em 500ms
     setTimeout(() => {
@@ -75,8 +92,8 @@ export function CadastroRefeicao({}) {
     } else {
       toggleDatePicker();
     }
+    setData(date);
   };
-
   const onChangeTime = ({ type }: onChangeProps, date: Date | undefined) => {
     if (date === undefined) {
       return;
@@ -90,10 +107,73 @@ export function CadastroRefeicao({}) {
     } else {
       toggleDateTimePicker();
     }
+    setHora(date);
   };
-  function handleIsDentroDaDieta() {
-    setIsDentroDaDieta(!isDentroDaDieta);
+  function handleIsDentroDaDieta(botaoClicado: boolean) {
+    setIsDentroDaDieta(botaoClicado);
   }
+  async function handleSalvarRefeicao() {
+    try {
+      if (nome.trim().length === 0) {
+        return Alert.alert('Refeição', 'O campo Nome é obrigatório!');
+      }
+      if (descricao.trim().length === 0) {
+        return Alert.alert('Refeição', 'O campo Descrição é obrigatório!');
+      }
+      if (isDentroDaDieta === null) {
+        return Alert.alert(
+          'Refeição',
+          'Você deve marcar se a refeição está ou não dentro da dieta!'
+        );
+      }
+      const refeicaoParaArmazenar: RefeicaoDTO = {
+        nome,
+        descricao,
+        data,
+        hora,
+        isDentroDaDieta,
+      };
+      await cadastrarNovaRefeicao(refeicaoParaArmazenar);
+      navigation.navigate('refeicoes');
+    } catch (error) {
+      Alert.alert('Nova refeição', 'Não foi possível registrar esta refeição');
+      console.log(error);
+    }
+  }
+  function handleGoToRefeicoes() {
+    navigation.navigate('refeicoes');
+  }
+  function carregarRefeicao() {
+    if (refeicao) {
+      setIsEdicao(true);
+      setData(refeicao.data);
+      setDescricao(refeicao.descricao);
+      setHora(refeicao.hora);
+      setNome(refeicao.nome);
+      setIsDentroDaDieta(refeicao.isDentroDaDieta);
+      setHoraUTCBrasil(refeicao.hora.toLocaleTimeString('pt-BR'));
+      console.log('Chamou');
+    }
+  }
+
+  async function handleEditarRefeicao() {
+    const refeicaoEditada: RefeicaoDTO = {
+      data,
+      descricao,
+      hora,
+      isDentroDaDieta: isDentroDaDieta === null || false ? false : true,
+      nome,
+    };
+    if (await editarRefeicao(refeicao, refeicaoEditada)) {
+      navigation.navigate('refeicoes');
+    }
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      carregarRefeicao();
+    }, [])
+  );
 
   return (
     <ScrollView
@@ -105,16 +185,23 @@ export function CadastroRefeicao({}) {
     >
       <Container>
         <HeaderCard>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleGoToRefeicoes}>
             <SetaEsquerda />
           </TouchableOpacity>
-          <HeaderTitle>Nova refeição</HeaderTitle>
+          <HeaderTitle>
+            {isEdicao ? 'Editar refeição' : 'Nova refeição'}
+          </HeaderTitle>
         </HeaderCard>
         <Content>
           <InputTitle>Nome</InputTitle>
-          <InputText />
+          <InputText onChangeText={setNome} value={nome} />
           <InputTitle>Descrição</InputTitle>
-          <LargeInputText numberOfLines={4} multiline />
+          <LargeInputText
+            numberOfLines={4}
+            multiline
+            onChangeText={setDescricao}
+            value={descricao}
+          />
 
           <View>
             <InputTitle>Data</InputTitle>
@@ -221,7 +308,7 @@ export function CadastroRefeicao({}) {
               isBotaoSelecionado={
                 isDentroDaDieta === null ? null : isDentroDaDieta
               }
-              onPress={handleIsDentroDaDieta}
+              onPress={() => handleIsDentroDaDieta(true)}
               type="PRIMARY"
             >
               <BooleanButtonIndicator type="PRIMARY" />
@@ -231,7 +318,7 @@ export function CadastroRefeicao({}) {
               isBotaoSelecionado={
                 isDentroDaDieta === null ? null : !isDentroDaDieta
               }
-              onPress={handleIsDentroDaDieta}
+              onPress={() => handleIsDentroDaDieta(false)}
               type="SECONDARY"
             >
               <BooleanButtonIndicator type="SECONDARY" />
@@ -239,7 +326,19 @@ export function CadastroRefeicao({}) {
               <BooleanButtonText>Não</BooleanButtonText>
             </BooleanButton>
           </SidedInputs>
-          <Button title="Cadastrar refeição" style={{ marginTop: 42 }} />
+          {isEdicao ? (
+            <Button
+              title="Editar refeição"
+              style={{ marginTop: 42 }}
+              onPress={handleEditarRefeicao}
+            />
+          ) : (
+            <Button
+              title="Cadastrar refeição"
+              style={{ marginTop: 42 }}
+              onPress={handleSalvarRefeicao}
+            />
+          )}
         </Content>
       </Container>
     </ScrollView>

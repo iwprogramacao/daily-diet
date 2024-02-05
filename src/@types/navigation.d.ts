@@ -4,7 +4,7 @@ export declare global {
   namespace ReactNavigation {
     interface RootParamList {
       refeicoes: undefined;
-      cadastroRefeicoes: {
+      cadastroRefeicao: {
         refeicao?: RefeicaoDTO;
       };
       detalhamentoRefeicao: {

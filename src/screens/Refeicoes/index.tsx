@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ButtonTitle, Container, Logo } from './styles';
 import logo from '@assets/logo.png';
 import { StatisticsCard } from '@components/StatisticsCard';
@@ -9,7 +9,8 @@ import { DietaContainerTitle } from '@components/RefeicaoCard/styles';
 import { Functions } from '../../Utils/Functions';
 import { RefeicaoDTO } from 'src/interfaces/RefeicaoDTO';
 import { ListEmpty } from '@components/ListEmpty';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { obterTodasRefeicoes } from '@storage/refeicao/obterTodasRefeicoes';
 
 type DietaDTO = {
   dataFormatada: string;
@@ -32,6 +33,7 @@ export function Refeicoes() {
   const navigation = useNavigation();
 
   const [dietas, setDietas] = useState<DietaDTO[]>([]);
+  const [refeicoes, setRefeicoes] = useState<RefeicaoDTO[]>([]);
   const [estatisticas, setEstatisticas] = useState<EstatisticasProps>({
     porcentagemDentroDaDieta: 0,
     refeicoesDentroDaDieta: 0,
@@ -39,23 +41,44 @@ export function Refeicoes() {
     refeicoesRegistradas: 0,
     sequenciaDentroDaDieta: 0,
   });
+  const [data, setData] = useState<SectionListProps[]>([]);
 
-  const DATA: SectionListProps[] = [];
+  function preencherSectionList(datas: Date[], refeicoes: RefeicaoDTO[]) {
+    const DATA: SectionListProps[] = [];
 
-  function preencherSectionList() {
-    for (const dieta of dietas) {
-      DATA.push({ title: dieta.dataFormatada, data: dieta.refeicoes });
+    for (const data of datas) {
+      const refeicoesNaData = refeicoes.filter((refeicao) => {
+        const dataSemHorario = new Date(
+          data.getFullYear(),
+          data.getMonth(),
+          data.getDate()
+        );
+        const dataRefeicaoSemHorario = new Date(
+          refeicao.data.getFullYear(),
+          refeicao.data.getMonth(),
+          refeicao.data.getDate()
+        );
+        return (
+          dataSemHorario.toISOString() == dataRefeicaoSemHorario.toISOString()
+        );
+      });
+
+      DATA.push({
+        title: data.toLocaleDateString('pt-br'),
+        data: refeicoesNaData,
+      });
     }
+    setData(DATA);
   }
-
   function handleGoToEstatisticas() {
     navigation.navigate('estatisticas', { ...estatisticas });
   }
-
   function handleGoToCadastroRefeicao() {
-    navigation.navigate('cadastroRefeicoes', {});
+    navigation.navigate('cadastroRefeicao', {});
   }
-
+  function handleGoToDescricao(refeicao: RefeicaoDTO) {
+    navigation.navigate('detalhamentoRefeicao', { refeicao });
+  }
   function gerarEstatisticas() {
     const stats: EstatisticasProps = {
       porcentagemDentroDaDieta: 0,
@@ -136,26 +159,72 @@ export function Refeicoes() {
 
     return (refeicoesNaDieta / totalRefeicoes) * 100;
   }
+  async function handleGetRefeicoes() {
+    await getRefeicoes();
+  }
+  async function getRefeicoes() {
+    try {
+      const refeicoes = await obterTodasRefeicoes();
+      setRefeicoes(refeicoes);
+
+      const datasDistintasSet = new Set();
+
+      const datasDistintas = refeicoes
+        .filter((refeicao) => {
+          const dataSemHorario = new Date(
+            refeicao.data.getFullYear(),
+            refeicao.data.getMonth(),
+            refeicao.data.getDate()
+          );
+          const dataString = dataSemHorario.toISOString(); // Converte para string para garantir a comparação
+
+          if (!datasDistintasSet.has(dataString)) {
+            datasDistintasSet.add(dataString);
+            return true;
+          }
+          return false;
+        })
+        .map((item) => item.data);
+
+      preencherSectionList(datasDistintas, refeicoes);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      handleGetRefeicoes();
+      gerarEstatisticas();
+    }, [])
+  );
 
   return (
     <Container>
       <Logo source={logo} />
       <StatisticsCard
-        percentage={functions.formatarPorcentagem(90.86)}
+        percentage={functions.formatarPorcentagem(
+          estatisticas.porcentagemDentroDaDieta
+        )}
         onPress={handleGoToEstatisticas}
       />
       <ButtonTitle>Refeições</ButtonTitle>
-      <Button icon="add" title="Nova refeição" />
+      <Button
+        icon="add"
+        title="Nova refeição"
+        onPress={handleGoToCadastroRefeicao}
+      />
 
       <SectionList
-        sections={DATA}
+        sections={data}
         keyExtractor={(item, index) => item.hora.toString() + index}
-        contentContainerStyle={DATA.length !== 0 ? { gap: 9 } : { flex: 1 }}
+        contentContainerStyle={data.length !== 0 ? { gap: 9 } : { flex: 1 }}
         renderItem={({ item }) => (
           <RefeicaoCard
-            hora={item.hora.toLocaleTimeString()}
+            hora={functions.converterHoraMinuto(item.hora.toLocaleTimeString())}
             refeicao={item.nome}
             isDentroDaDieta={item.isDentroDaDieta}
+            onPress={() => handleGoToDescricao(item)}
           />
         )}
         renderSectionHeader={({ section: { title } }) => (

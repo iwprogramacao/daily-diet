@@ -1,4 +1,5 @@
 import { ArrowLeft } from 'phosphor-react-native';
+import { TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import theme from 'src/theme';
 import styled from 'styled-components/native';
@@ -89,7 +90,7 @@ export const SidedInputs = styled.View`
   gap: 12px;
 `;
 
-export const BooleanButton = styled.TouchableOpacity<BooleanButtonStyleProps>`
+export const BooleanButton = styled(TouchableOpacity)<BooleanButtonStyleProps>`
   width: 48.5%;
   min-height: 50px;
   max-height: 50px;
